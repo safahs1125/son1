@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS topics (
   ders TEXT NOT NULL,
   konu TEXT NOT NULL,
   durum TEXT DEFAULT 'baslanmadi' CHECK (durum IN ('baslanmadi', 'devam', 'tamamlandi')),
+  sinav_turu TEXT DEFAULT 'TYT' CHECK (sinav_turu IN ('TYT', 'AYT')),
   order_index INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
