@@ -150,54 +150,65 @@ export default function TopicsTab({ studentId }) {
         </Dialog>
       </div>
 
-      {/* Topics by Subject */}
-      <div className="space-y-6">
-        {Object.entries(groupedTopics).map(([ders, dersTopics]) => (
-          <Card key={ders} className="p-6 gradient-card">
-            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-              <span className="w-2 h-8 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full mr-3"></span>
-              {ders}
-            </h3>
-            <div className="space-y-3">
-              {dersTopics.map((topic) => (
-                <div
-                  key={topic.id}
-                  className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm"
-                  data-testid={`topic-item-${topic.id}`}
-                >
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-800">{topic.konu}</p>
+      {/* Topics by Exam Type and Subject */}
+      <div className="space-y-8">
+        {Object.entries(groupedTopics).map(([sinavType, dersGroups]) => (
+          <div key={sinavType} className="space-y-4">
+            <h2 className="text-3xl font-bold text-gray-800 flex items-center">
+              <span className={`px-4 py-2 rounded-lg mr-3 ${sinavType === 'TYT' ? 'bg-gradient-to-r from-blue-500 to-cyan-600' : 'bg-gradient-to-r from-violet-500 to-purple-600'} text-white`}>
+                {sinavType}
+              </span>
+            </h2>
+            <div className="space-y-4">
+              {Object.entries(dersGroups).map(([ders, dersTopics]) => (
+                <Card key={ders} className="p-6 gradient-card">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <span className="w-2 h-8 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full mr-3"></span>
+                    {ders}
+                  </h3>
+                  <div className="space-y-3">
+                    {dersTopics.map((topic) => (
+                      <div
+                        key={topic.id}
+                        className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm"
+                        data-testid={`topic-item-${topic.id}`}
+                      >
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-800">{topic.konu}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Select value={topic.durum} onValueChange={(value) => handleUpdateStatus(topic.id, value)}>
+                            <SelectTrigger className="w-[180px]" data-testid={`topic-status-${topic.id}`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="baslanmadi">
+                                <span className="status-badge status-baslanmadi">Başlanmadı</span>
+                              </SelectItem>
+                              <SelectItem value="devam">
+                                <span className="status-badge status-devam">Devam Ediyor</span>
+                              </SelectItem>
+                              <SelectItem value="tamamlandi">
+                                <span className="status-badge status-tamamlandi">Tamamlandı</span>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteTopic(topic.id)}
+                            data-testid={`delete-topic-${topic.id}`}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Select value={topic.durum} onValueChange={(value) => handleUpdateStatus(topic.id, value)}>
-                      <SelectTrigger className="w-[180px]" data-testid={`topic-status-${topic.id}`}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="baslanmadi">
-                          <span className="status-badge status-baslanmadi">Başlanmadı</span>
-                        </SelectItem>
-                        <SelectItem value="devam">
-                          <span className="status-badge status-devam">Devam Ediyor</span>
-                        </SelectItem>
-                        <SelectItem value="tamamlandi">
-                          <span className="status-badge status-tamamlandi">Tamamlandı</span>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteTopic(topic.id)}
-                      data-testid={`delete-topic-${topic.id}`}
-                    >
-                      <Trash2 className="w-4 h-4 text-red-500" />
-                    </Button>
-                  </div>
-                </div>
+                </Card>
               ))}
             </div>
-          </Card>
+          </div>
         ))}
       </div>
 
