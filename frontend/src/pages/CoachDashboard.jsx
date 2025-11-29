@@ -69,6 +69,17 @@ export default function CoachDashboard() {
     }
   };
 
+  const handleDeleteStudent = async (studentId, studentName) => {
+    if (!window.confirm(`${studentName} adlı öğrenciyi silmek istediğinize emin misiniz? Tüm verileri silinecek!`)) return;
+    try {
+      await axios.delete(`${BACKEND_URL}/api/students/${studentId}`);
+      toast.success('Öğrenci silindi');
+      fetchStudents();
+    } catch (error) {
+      toast.error('Öğrenci silinirken hata oluştu');
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('coachToken');
     navigate('/coach/login');
