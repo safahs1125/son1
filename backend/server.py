@@ -191,10 +191,10 @@ async def delete_topic(topic_id: str):
 
 @api_router.post("/topics/init/{student_id}")
 async def init_topics(student_id: str, bolum: str):
-    """Initialize default topics for a student based on their bolum"""
+    """Initialize default TYT and AYT topics for a student"""
     topics = []
     
-    # Normalize bolum name to handle URL encoding issues
+    # Normalize bolum name
     bolum_normalized = bolum.strip().lower()
     if 'sayisal' in bolum_normalized or 'sayısal' in bolum_normalized:
         bolum = "Sayısal"
@@ -203,8 +203,26 @@ async def init_topics(student_id: str, bolum: str):
     elif 'sozel' in bolum_normalized or 'sözel' in bolum_normalized:
         bolum = "Sözel"
     
-    # TYT Topics for all students - GÜNCEL MÜFREDAT
-    tyt_topics = [
+    order_index = 0
+    
+    # Add TYT Topics for all students
+    for ders_name, konu_list in TYT_TOPICS.items():
+        for konu in konu_list:
+            data = {
+                "id": str(uuid.uuid4()),
+                "student_id": student_id,
+                "ders": f"TYT - {ders_name}",
+                "konu": konu,
+                "durum": "baslanmadi",
+                "order_index": order_index,
+                "sinav_turu": "TYT"
+            }
+            response = supabase.table("topics").insert(data).execute()
+            topics.extend(response.data)
+            order_index += 1
+    
+    # Add AYT Topics based on bolum
+    ayt_topics_dict = {
         # Türkçe (40 soru)
         {"ders": "Türkçe", "konu": "Ses Bilgisi"},
         {"ders": "Türkçe", "konu": "Yazım Kuralları"},
