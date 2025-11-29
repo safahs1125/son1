@@ -203,27 +203,43 @@ export default function CoachDashboard() {
             {filteredStudents.map((student) => (
               <Card
                 key={student.id}
-                className="p-6 gradient-card card-hover cursor-pointer"
-                onClick={() => navigate(`/coach/student/${student.id}`)}
+                className="p-6 gradient-card card-hover relative"
                 data-testid={`student-card-${student.id}`}
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
-                    {student.ad.charAt(0)}{student.soyad?.charAt(0) || ''}
+                <div 
+                  className="cursor-pointer"
+                  onClick={() => navigate(`/coach/student/${student.id}`)}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
+                      {student.ad.charAt(0)}{student.soyad?.charAt(0) || ''}
+                    </div>
+                    <span className="px-3 py-1 bg-gradient-to-r from-violet-100 to-purple-100 text-violet-700 rounded-full text-xs font-semibold">
+                      {student.bolum}
+                    </span>
                   </div>
-                  <span className="px-3 py-1 bg-gradient-to-r from-violet-100 to-purple-100 text-violet-700 rounded-full text-xs font-semibold">
-                    {student.bolum}
-                  </span>
+                  <h3 className="text-xl font-bold text-gray-800 mb-1">
+                    {student.ad} {student.soyad || ''}
+                  </h3>
+                  {student.hedef && (
+                    <p className="text-sm text-gray-600 mb-2">🎯 Hedef: {student.hedef}</p>
+                  )}
+                  {student.notlar && (
+                    <p className="text-sm text-gray-500 mt-3 line-clamp-2">{student.notlar}</p>
+                  )}
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-1">
-                  {student.ad} {student.soyad || ''}
-                </h3>
-                {student.hedef && (
-                  <p className="text-sm text-gray-600 mb-2">🎯 Hedef: {student.hedef}</p>
-                )}
-                {student.notlar && (
-                  <p className="text-sm text-gray-500 mt-3 line-clamp-2">{student.notlar}</p>
-                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute top-4 right-4"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteStudent(student.id, `${student.ad} ${student.soyad || ''}`);
+                  }}
+                  data-testid={`delete-student-${student.id}`}
+                >
+                  <Trash2 className="w-4 h-4 text-red-500" />
+                </Button>
               </Card>
             ))}
           </div>
