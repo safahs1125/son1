@@ -19,9 +19,10 @@ export default function Last7DaysSummary({ studentId }) {
     try {
       const response = await axios.get(`${BACKEND_URL}/api/student/${studentId}/last-7-days-summary`);
       setSummary(response.data);
+      setLoading(false);
     } catch (error) {
+      console.error('Summary fetch error:', error);
       toast.error('Özet yüklenemedi');
-    } finally {
       setLoading(false);
     }
   };
