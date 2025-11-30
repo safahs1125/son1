@@ -110,13 +110,14 @@ export default function TaskPool({ studentId, onTaskAssigned }) {
     <Card className="p-4 gradient-card">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-bold text-gray-800">Görev Havuzu</h3>
-        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="bg-gradient-to-r from-amber-500 to-orange-600">
-              <Plus className="w-4 h-4 mr-2" />
-              Görev Ekle
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline" className="bg-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Tek Görev
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Havuza Görev Ekle</DialogTitle>
