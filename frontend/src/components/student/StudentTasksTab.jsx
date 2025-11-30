@@ -138,28 +138,7 @@ export default function StudentTasksTab({ studentId, onRefresh }) {
     const { source, destination, draggableId } = result;
 
     if (!destination) return;
-
-    // Görev havuzundan günlere sürükleme
-    if (source.droppableId === 'task-pool') {
-      try {
-        const currentWeek = startOfWeek(new Date(), { weekStartsOn: 1 });
-        const dayIndex = DAYS.indexOf(destination.droppableId);
-        const taskDate = addDays(currentWeek, dayIndex);
-
-        await axios.post(`${BACKEND_URL}/api/task-pool/${draggableId}/assign`, null, {
-          params: {
-            tarih: format(taskDate, 'yyyy-MM-dd'),
-            gun: destination.droppableId
-          }
-        });
-
-        toast.success('Görev atandı');
-        fetchTasks();
-      } catch (error) {
-        toast.error('Görev atanamadı');
-      }
-      return;
-    }
+    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
 
     // Günler arası taşıma
     if (source.droppableId !== destination.droppableId) {
