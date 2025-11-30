@@ -16,8 +16,16 @@ export default function Last7DaysSummary({ studentId }) {
   }, [studentId]);
 
   const fetchSummary = async () => {
+    if (!studentId) {
+      console.error('StudentId is missing');
+      setLoading(false);
+      return;
+    }
+    
     try {
+      console.log('Fetching summary for student:', studentId);
       const response = await axios.get(`${BACKEND_URL}/api/student/${studentId}/last-7-days-summary`);
+      console.log('Summary response:', response.data);
       setSummary(response.data);
       setLoading(false);
     } catch (error) {
