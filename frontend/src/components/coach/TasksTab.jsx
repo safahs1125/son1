@@ -8,6 +8,8 @@ import { Plus, Trash2, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, startOfWeek, addDays } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import TaskPool from './TaskPool';
+import TaskHistory from './TaskHistory';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
