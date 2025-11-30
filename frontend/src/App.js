@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/sonner';
 import CoachLogin from './pages/CoachLogin';
 import CoachDashboard from './pages/CoachDashboard';
+import CoachPanel from './pages/CoachPanel';
 import StudentDetails from './pages/StudentDetails';
 import StudentLogin from './pages/StudentLogin';
 import StudentPanel from './pages/StudentPanel';
