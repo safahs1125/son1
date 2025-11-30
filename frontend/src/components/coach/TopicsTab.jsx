@@ -38,15 +38,21 @@ export default function TopicsTab({ studentId }) {
       return;
     }
     try {
+      const dersPrefix = newTopic.sinav_turu === 'AYT' && newTopic.sinav_turu !== 'TYT' 
+        ? `AYT - ${newTopic.ders}` 
+        : `TYT - ${newTopic.ders}`;
+      
       await axios.post(`${BACKEND_URL}/api/topics`, {
         student_id: studentId,
-        ...newTopic,
+        ders: dersPrefix,
+        konu: newTopic.konu,
+        sinav_turu: newTopic.sinav_turu,
         durum: 'baslanmadi',
         order_index: topics.length
       });
       toast.success('Konu eklendi');
       setOpenDialog(false);
-      setNewTopic({ ders: '', konu: '' });
+      setNewTopic({ ders: '', konu: '', sinav_turu: 'TYT', ayt_type: 'Sayısal AYT' });
       fetchTopics();
     } catch (error) {
       toast.error('Konu eklenemedi');
