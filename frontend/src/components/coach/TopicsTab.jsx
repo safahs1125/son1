@@ -15,7 +15,7 @@ export default function TopicsTab({ studentId }) {
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
-  const [newTopic, setNewTopic] = useState({ ders: '', konu: '' });
+  const [newTopic, setNewTopic] = useState({ ders: '', konu: '', sinav_turu: 'TYT', ayt_type: 'Sayısal AYT' });
 
   useEffect(() => {
     fetchTopics();
