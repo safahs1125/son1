@@ -230,14 +230,19 @@ export default function StudentTasksTab({ studentId, onRefresh }) {
 
       {/* Weekly View */}
       <div className="grid grid-cols-1 lg:grid-cols-7 gap-4">
-        {DAYS.map((day) => {
+        {DAYS.map((day, dayIndex) => {
           const dayTasks = getTasksByDay(day);
           const totalMinutes = getDayTotalMinutes(day);
+          const currentWeek = startOfWeek(new Date(), { weekStartsOn: 1 });
+          const dayDate = addDays(currentWeek, dayIndex);
           
           return (
             <Card key={day} className="p-4 gradient-card" data-testid={`student-day-card-${day}`}>
               <div className="mb-3">
                 <h4 className="font-bold text-gray-800 text-center">{day}</h4>
+                <p className="text-xs text-gray-600 text-center">
+                  {format(dayDate, 'd MMM yyyy', { locale: tr })}
+                </p>
                 <p className="text-xs text-gray-600 text-center mt-1">
                   {totalMinutes}dk ({Math.round(totalMinutes / 60)}s)
                 </p>
