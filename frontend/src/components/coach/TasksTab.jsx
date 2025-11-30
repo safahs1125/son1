@@ -317,6 +317,11 @@ export default function TasksTab({ studentId }) {
           );
         })}
       </div>
+
+      {/* Task History */}
+      <div className="mt-8">
+        <TaskHistory tasks={tasks} />
+      </div>
     </div>
   );
 }
