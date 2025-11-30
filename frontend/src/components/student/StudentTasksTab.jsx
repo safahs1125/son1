@@ -293,6 +293,11 @@ export default function StudentTasksTab({ studentId, onRefresh }) {
           );
         })}
       </div>
+
+      {/* Görev Geçmişi */}
+      <div className="mt-8">
+        <TaskHistory tasks={tasks} />
+      </div>
     </div>
   );
 }
