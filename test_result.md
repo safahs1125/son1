@@ -211,3 +211,69 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: "KRİTİK SORUN ÇÖZÜLDÜ: Yeni endpoint'ler app.include_router(api_router) satırından SONRA tanımlandığı için router'a eklenmiyordu. Tüm yeni endpoint'ler (coach/calendar, coach/notes, books, task-pool) satır 352'den önceye taşındı. Backend ve frontend testleri başarılı. Sırada: Drag-and-drop özelliği implementasyonu."
+
+---
+
+## Test Results - Öğrenci Paneli Özellikleri - 30 Kasım 2025
+
+### Eklenen Özellikler
+
+**1. Öğrenci Panelinde Collapsible Ders → Konu Görünümü**
+   - Dosya: `/app/frontend/src/components/student/StudentTopicsView.jsx`
+   - Durum: ✅ Tamamlandı
+   - Değişiklik: TYT/AYT gruplu, açılıp kapanabilen konu listesi
+   - Test: Kod implementasyonu doğrulandı
+
+**2. Öğrenci Panelinde Görev Havuzu**
+   - Dosya: `/app/frontend/src/components/student/StudentTasksTab.jsx`
+   - Durum: ✅ Tamamlandı
+   - Değişiklik: TaskPool component'i öğrenci paneline eklendi
+   - Test: Import ve prop geçişi doğrulandı
+
+**3. Öğrenci Haftalık Görevlerinde Tarih Gösterimi**
+   - Dosya: `/app/frontend/src/components/student/StudentTasksTab.jsx`
+   - Durum: ✅ Tamamlandı
+   - Değişiklik: Her günün üstünde "d MMM yyyy" formatında tarih
+   - Test: Kod implementasyonu doğrulandı
+
+**4. Öğrenci Görev Geçmişi**
+   - Dosya: `/app/frontend/src/components/student/StudentTasksTab.jsx`
+   - Durum: ✅ Tamamlandı
+   - Değişiklik: TaskHistory component'i eklendi
+   - Test: Import ve prop geçişi doğrulandı
+
+**5. Görev Havuzuna Çoklu Görev Ekleme (Gelişmiş)**
+   - Dosya: `/app/frontend/src/components/coach/TaskPool.jsx`
+   - Durum: ✅ Tamamlandı
+   - Değişiklik: 15'e kadar görev ekleyebilen bulk add dialog
+   - Alanlar: Ders, Konu, Zorluk, Açıklama, Süre
+   - Test: Kod implementasyonu doğrulandı
+
+**6. Sürükle-Bırak Özelliği (react-beautiful-dnd)**
+   - Dosyalar: 
+     - `/app/frontend/src/components/student/StudentTasksTab.jsx`
+     - `/app/frontend/src/components/coach/TaskPool.jsx`
+   - Durum: ✅ Tamamlandı
+   - Özellikler:
+     - Görev Havuzu'ndan günlere sürükleme
+     - Günler arası görev taşıma
+     - Görsel feedback (ring, shadow)
+     - Grip ikonu ile tutma alanı
+   - Test: Kod implementasyonu ve API endpoint kullanımı doğrulandı
+
+### API Testleri
+- `/api/students`: ✅ Çalışıyor (5 öğrenci bulundu)
+- `/api/student/{id}/last-7-days-summary`: ✅ Çalışıyor
+- `/api/task-pool/{student_id}`: ✅ Çalışıyor
+- `/api/task-pool/{item_id}/assign`: ✅ Endpoint kullanımda
+
+### Lint Sonuçları
+- Backend: 9 unused variable uyarısı (kritik değil)
+- Frontend: Minor hook dependency uyarıları (çalışmayı etkilemiyor)
+
+### Korunan Özellikler
+✅ Veritabanı şeması değiştirilmedi
+✅ Mevcut tablolar kullanıldı (tasks, task_pool, topics)
+✅ Koç paneli fonksiyonları bozulmadı
+✅ Sadece öğrenci paneline yeni UI/UX eklendi
+
