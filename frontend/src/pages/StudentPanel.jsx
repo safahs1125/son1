@@ -10,6 +10,7 @@ import StudentTasksTab from '@/components/student/StudentTasksTab';
 import StudentTopicsView from '@/components/student/StudentTopicsView';
 import StudentExamsView from '@/components/student/StudentExamsView';
 import StudentCalendarTab from '@/components/student/StudentCalendarTab';
+import Last7DaysSummary from '@/components/student/Last7DaysSummary';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
