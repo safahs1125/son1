@@ -231,90 +231,125 @@ export default function StudentTasksTab({ studentId, onRefresh }) {
       {/* Task Pool - Öğrenci için */}
       <TaskPool studentId={studentId} onTaskAssigned={fetchTasks} />
 
-      {/* Weekly View - with Drag & Drop */}
-      <DragDropContext onDragEnd={onDragEnd}>
-        <div className="grid grid-cols-1 lg:grid-cols-7 gap-4">
-          {DAYS.map((day, dayIndex) => {
-            const dayTasks = getTasksByDay(day);
-            const totalMinutes = getDayTotalMinutes(day);
-            const currentWeek = startOfWeek(new Date(), { weekStartsOn: 1 });
-            const dayDate = addDays(currentWeek, dayIndex);
-            
-            return (
-              <Droppable key={day} droppableId={day}>
-                {(provided, snapshot) => (
-                  <Card 
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={`p-4 gradient-card ${snapshot.isDraggingOver ? 'ring-2 ring-amber-400' : ''}`}
-                    data-testid={`student-day-card-${day}`}
+      {/* Weekly View - Native Drag & Drop */}
+      <div className="grid grid-cols-1 lg:grid-cols-7 gap-4">
+        {DAYS.map((day, dayIndex) => {
+          const dayTasks = getTasksByDay(day);
+          const totalMinutes = getDayTotalMinutes(day);
+          const currentWeek = startOfWeek(new Date(), { weekStartsOn: 1 });
+          const dayDate = addDays(currentWeek, dayIndex);
+          
+          return (
+            <Card 
+              key={day}
+              className="p-4 gradient-card"
+              data-testid={`student-day-card-${day}`}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.currentTarget.classList.add('ring-2', 'ring-amber-400');
+              }}
+              onDragLeave={(e) => {
+                e.currentTarget.classList.remove('ring-2', 'ring-amber-400');
+              }}
+              onDrop={async (e) => {
+                e.preventDefault();
+                e.currentTarget.classList.remove('ring-2', 'ring-amber-400');
+                
+                const taskPoolId = e.dataTransfer.getData('taskPoolId');
+                const taskId = e.dataTransfer.getData('taskId');
+                const sourceDay = e.dataTransfer.getData('sourceDay');
+
+                // Görev havuzundan atama
+                if (taskPoolId) {
+                  try {
+                    await axios.post(`${BACKEND_URL}/api/task-pool/${taskPoolId}/assign`, null, {
+                      params: {
+                        tarih: format(dayDate, 'yyyy-MM-dd'),
+                        gun: day
+                      }
+                    });
+                    toast.success('Görev atandı');
+                    fetchTasks();
+                  } catch (error) {
+                    toast.error('Görev atanamadı');
+                  }
+                }
+                // Günler arası taşıma
+                else if (taskId && sourceDay !== day) {
+                  try {
+                    await axios.put(`${BACKEND_URL}/api/tasks/${taskId}`, {
+                      gun: day,
+                      tarih: format(dayDate, 'yyyy-MM-dd')
+                    });
+                    toast.success('Görev taşındı');
+                    fetchTasks();
+                  } catch (error) {
+                    toast.error('Görev taşınamadı');
+                  }
+                }
+              }}
+            >
+              <div className="mb-3">
+                <h4 className="font-bold text-gray-800 text-center">{day}</h4>
+                <p className="text-xs text-gray-600 text-center">
+                  {format(dayDate, 'd MMM yyyy', { locale: tr })}
+                </p>
+                <p className="text-xs text-gray-600 text-center mt-1">
+                  {totalMinutes}dk ({Math.round(totalMinutes / 60)}s)
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                {dayTasks.map((task) => (
+                  <div
+                    key={task.id}
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.effectAllowed = 'move';
+                      e.dataTransfer.setData('taskId', task.id);
+                      e.dataTransfer.setData('sourceDay', day);
+                    }}
+                    className={`p-3 rounded-lg bg-white shadow-sm border-l-4 ${
+                      task.completed ? 'border-green-500' : 'border-orange-500'
+                    } cursor-move hover:shadow-md transition-shadow`}
+                    data-testid={`student-task-item-${task.id}`}
                   >
-                    <div className="mb-3">
-                      <h4 className="font-bold text-gray-800 text-center">{day}</h4>
-                      <p className="text-xs text-gray-600 text-center">
-                        {format(dayDate, 'd MMM yyyy', { locale: tr })}
-                      </p>
-                      <p className="text-xs text-gray-600 text-center mt-1">
-                        {totalMinutes}dk ({Math.round(totalMinutes / 60)}s)
-                      </p>
+                    <div className="flex items-start gap-2">
+                      <GripVertical className="w-4 h-4 text-gray-400 cursor-grab mt-1" />
+                      <input
+                        type="checkbox"
+                        checked={task.completed}
+                        onChange={() => handleToggleComplete(task)}
+                        className="mt-1"
+                        data-testid={`student-task-checkbox-${task.id}`}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm break-words ${task.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
+                          {task.aciklama}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">{task.sure}dk</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteTask(task.id)}
+                        className="p-1 h-auto"
+                        data-testid={`student-delete-task-${task.id}`}
+                      >
+                        <Trash2 className="w-3 h-3 text-red-500" />
+                      </Button>
                     </div>
-                    
-                    <div className="space-y-2">
-                      {dayTasks.map((task, index) => (
-                        <Draggable key={task.id} draggableId={task.id} index={index}>
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              className={`p-3 rounded-lg bg-white shadow-sm border-l-4 ${
-                                task.completed ? 'border-green-500' : 'border-orange-500'
-                              } ${snapshot.isDragging ? 'shadow-lg' : ''}`}
-                              data-testid={`student-task-item-${task.id}`}
-                            >
-                              <div className="flex items-start gap-2">
-                                <div {...provided.dragHandleProps} className="mt-1">
-                                  <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
-                                </div>
-                                <input
-                                  type="checkbox"
-                                  checked={task.completed}
-                                  onChange={() => handleToggleComplete(task)}
-                                  className="mt-1"
-                                  data-testid={`student-task-checkbox-${task.id}`}
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <p className={`text-sm break-words ${task.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
-                                    {task.aciklama}
-                                  </p>
-                                  <p className="text-xs text-gray-500 mt-1">{task.sure}dk</p>
-                                </div>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDeleteTask(task.id)}
-                                  className="p-1 h-auto"
-                                  data-testid={`student-delete-task-${task.id}`}
-                                >
-                                  <Trash2 className="w-3 h-3 text-red-500" />
-                                </Button>
-                              </div>
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                      
-                      {dayTasks.length === 0 && (
-                        <p className="text-xs text-gray-400 text-center py-4">Görev yok</p>
-                      )}
-                    </div>
-                  </Card>
+                  </div>
+                ))}
+                
+                {dayTasks.length === 0 && (
+                  <p className="text-xs text-gray-400 text-center py-4">Görev yok</p>
                 )}
-              </Droppable>
-            );
-          })}
-        </div>
-      </DragDropContext>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
 
       {/* Görev Geçmişi */}
       <div className="mt-8">
