@@ -228,7 +228,7 @@ export default function TasksTab({ studentId }) {
           </DialogTrigger>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Toplu Görev Ekle (10'a kadar)</DialogTitle>
+              <DialogTitle>Toplu Görev Ekle (10&apos;a kadar)</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
