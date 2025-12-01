@@ -134,6 +134,58 @@ export default function TasksTab({ studentId }) {
     return getTasksByDay(day).reduce((sum, task) => sum + task.sure, 0);
   };
 
+  const onDragEnd = async (result) => {
+    const { source, destination, draggableId } = result;
+
+    if (!destination) return;
+    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
+
+    // Görev havuzundan günlere sürükleme
+    if (source.droppableId === 'task-pool') {
+      try {
+        const currentWeek = startOfWeek(new Date(), { weekStartsOn: 1 });
+        const dayIndex = DAYS.indexOf(destination.droppableId);
+        const taskDate = addDays(currentWeek, dayIndex);
+
+        await axios.post(`${BACKEND_URL}/api/task-pool/${draggableId}/assign`, null, {
+          params: {
+            tarih: format(taskDate, 'yyyy-MM-dd'),
+            gun: destination.droppableId
+          }
+        });
+
+        toast.success('Görev atandı');
+        fetchTasks();
+      } catch (error) {
+        console.error('Task assign error:', error);
+        toast.error('Görev atanamadı');
+      }
+      return;
+    }
+
+    // Günler arası taşıma
+    if (source.droppableId !== destination.droppableId) {
+      try {
+        const task = tasks.find(t => t.id === draggableId);
+        if (!task) return;
+
+        const currentWeek = startOfWeek(new Date(), { weekStartsOn: 1 });
+        const dayIndex = DAYS.indexOf(destination.droppableId);
+        const newDate = addDays(currentWeek, dayIndex);
+
+        await axios.put(`${BACKEND_URL}/api/tasks/${draggableId}`, {
+          gun: destination.droppableId,
+          tarih: format(newDate, 'yyyy-MM-dd')
+        });
+
+        toast.success('Görev taşındı');
+        fetchTasks();
+      } catch (error) {
+        toast.error('Görev taşınamadı');
+      }
+    }
+  };
+
   if (loading) {
     return <div className="flex justify-center p-8"><div className="loading-spinner"></div></div>;
   }
