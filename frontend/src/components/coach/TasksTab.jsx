@@ -8,7 +8,6 @@ import { Plus, Trash2, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, startOfWeek, addDays } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import TaskPool from './TaskPool';
 import TaskHistory from './TaskHistory';
 
