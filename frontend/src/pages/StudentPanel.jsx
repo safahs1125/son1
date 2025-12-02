@@ -185,8 +185,9 @@ export default function StudentPanel() {
 
         {/* Tabs */}
         <Tabs defaultValue="tasks" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6">
+          <TabsList className="grid w-full grid-cols-6 mb-6">
             <TabsTrigger value="tasks" data-testid="student-tasks-tab">Görevlerim</TabsTrigger>
+            <TabsTrigger value="analysis" data-testid="student-analysis-tab">Analizim</TabsTrigger>
             <TabsTrigger value="topics" data-testid="student-topics-tab">Konular</TabsTrigger>
             <TabsTrigger value="exams" data-testid="student-exams-tab">Denemeler</TabsTrigger>
             <TabsTrigger value="notifications" data-testid="student-notifications-tab">Bildirimler</TabsTrigger>
@@ -195,6 +196,10 @@ export default function StudentPanel() {
 
           <TabsContent value="tasks">
             <StudentTasksTab studentId={student.id} onRefresh={handleRefresh} />
+          </TabsContent>
+
+          <TabsContent value="analysis">
+            <StudentAnalysis studentId={student.id} />
           </TabsContent>
 
           <TabsContent value="topics">
