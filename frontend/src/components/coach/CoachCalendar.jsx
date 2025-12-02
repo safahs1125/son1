@@ -192,12 +192,12 @@ export default function CoachCalendar() {
           <div className="space-y-3">
             {events.map((event) => (
               <div key={event.id} className="p-4 bg-white rounded-lg shadow-sm flex justify-between items-start">
-                <div>
+                <div className="flex-1 min-w-0 pr-2">
                   <p className="text-sm text-gray-600 mb-1">
                     {new Date(event.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </p>
-                  <h4 className="font-semibold text-gray-800">{event.title}</h4>
-                  {event.note && <p className="text-sm text-gray-600 mt-1">{event.note}</p>}
+                  <h4 className="font-semibold text-gray-800 break-words">{event.title}</h4>
+                  {event.note && <p className="text-sm text-gray-600 mt-1 break-words whitespace-normal">{event.note}</p>}
                 </div>
                 <Button
                   variant="ghost"
