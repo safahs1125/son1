@@ -587,28 +587,6 @@ async def get_last_7_days_summary(student_id: str):
         "daily_activity": list(daily_data.values())
     }
 
-app.include_router(api_router)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
-
-# ============================================
-# FAZ 1: ONBOARDING ve VERİ TOPLAMA API'LERİ
-# ============================================
-
-# 1. ONBOARDING
 @api_router.get("/student/{student_id}/onboarding")
 async def get_student_onboarding(student_id: str):
     response = supabase.table("students").select("*").eq("id", student_id).execute()
@@ -810,4 +788,20 @@ async def get_daily_report(student_id: str, date: str):
         "pending_tasks": len(tasks_response.data) - len(completed_tasks),
         "most_studied_lesson": most_studied
     }
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 
