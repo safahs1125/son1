@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Lock } from 'lucide-react';
+import { toast } from 'sonner';
 import CoachCalendar from '@/components/coach/CoachCalendar';
 import CoachNotes from '@/components/coach/CoachNotes';
 import BookRecommendations from '@/components/coach/BookRecommendations';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 export default function CoachPanel() {
   const navigate = useNavigate();
