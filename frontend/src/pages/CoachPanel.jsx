@@ -101,6 +101,51 @@ export default function CoachPanel() {
           <TabsContent value="books">
             <BookRecommendations />
           </TabsContent>
+
+          <TabsContent value="settings">
+            <Card className="p-6 bg-gradient-to-br from-blue-50 to-white shadow-lg">
+              <div className="flex items-center gap-3 mb-6">
+                <Lock className="w-6 h-6 text-indigo-600" />
+                <h3 className="text-2xl font-bold text-gray-800">Şifre Değiştir</h3>
+              </div>
+              <div className="max-w-md space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Mevcut Şifre</label>
+                  <Input
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="Mevcut şifrenizi girin"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Yeni Şifre</label>
+                  <Input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="En az 6 karakter"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Yeni Şifre (Tekrar)</label>
+                  <Input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Yeni şifrenizi tekrar girin"
+                  />
+                </div>
+                <Button
+                  onClick={handleChangePassword}
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                >
+                  {loading ? 'Değiştiriliyor...' : 'Şifreyi Değiştir'}
+                </Button>
+              </div>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </div>
