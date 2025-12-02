@@ -602,3 +602,212 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+
+# ============================================
+# FAZ 1: ONBOARDING ve VERİ TOPLAMA API'LERİ
+# ============================================
+
+# 1. ONBOARDING
+@api_router.get("/student/{student_id}/onboarding")
+async def get_student_onboarding(student_id: str):
+    response = supabase.table("students").select("*").eq("id", student_id).execute()
+    if not response.data:
+        raise HTTPException(status_code=404, detail="Öğrenci bulunamadı")
+    
+    student = response.data[0]
+    return {
+        "onboarding_completed": student.get("onboarding_completed", False),
+        "sinif": student.get("sinif"),
+        "hedef_siralama": student.get("hedef_siralama"),
+        "gunluk_calisma_suresi": student.get("gunluk_calisma_suresi"),
+        "guclu_dersler": student.get("guclu_dersler", []),
+        "zayif_dersler": student.get("zayif_dersler", []),
+        "deneme_ortalamasi": student.get("deneme_ortalamasi"),
+        "kullanilan_kaynaklar": student.get("kullanilan_kaynaklar", []),
+        "program_onceligi": student.get("program_onceligi")
+    }
+
+@api_router.post("/student/{student_id}/onboarding")
+async def complete_student_onboarding(student_id: str, data: StudentOnboarding):
+    update_data = {
+        "onboarding_completed": True,
+        "sinif": data.sinif,
+        "hedef_siralama": data.hedef_siralama,
+        "gunluk_calisma_suresi": data.gunluk_calisma_suresi,
+        "guclu_dersler": data.guclu_dersler,
+        "zayif_dersler": data.zayif_dersler,
+        "deneme_ortalamasi": data.deneme_ortalamasi,
+        "kullanilan_kaynaklar": data.kullanilan_kaynaklar,
+        "program_onceligi": data.program_onceligi
+    }
+    
+    response = supabase.table("students").update(update_data).eq("id", student_id).execute()
+    
+    # Create welcome notification
+    notification_data = {
+        "id": str(uuid.uuid4()),
+        "user_id": student_id,
+        "type": "success",
+        "title": "Hoş Geldin!",
+        "message": "Profilin tamamlandı. Artık kişiselleştirilmiş çalışma planına erişebilirsin.",
+        "is_read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    supabase.table("notifications").insert(notification_data).execute()
+    
+    return {"success": True, "message": "Onboarding tamamlandı"}
+
+# 2. SORU TAKİP
+@api_router.get("/student/{student_id}/soru-takip")
+async def get_soru_takip(student_id: str, start_date: Optional[str] = None, end_date: Optional[str] = None):
+    query = supabase.table("soru_takip").select("*").eq("student_id", student_id)
+    
+    if start_date:
+        query = query.gte("date", start_date)
+    if end_date:
+        query = query.lte("date", end_date)
+    
+    response = query.order("date", desc=True).execute()
+    return response.data
+
+@api_router.post("/student/soru-takip")
+async def create_soru_takip(data: SoruTakip):
+    record = {
+        "id": str(uuid.uuid4()),
+        "student_id": data.student_id,
+        "date": data.date,
+        "lesson": data.lesson,
+        "topic": data.topic,
+        "source": data.source,
+        "solved": data.solved,
+        "correct": data.correct,
+        "wrong": data.wrong,
+        "blank": data.blank,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    response = supabase.table("soru_takip").insert(record).execute()
+    return response.data[0]
+
+# 3. KAYNAK TAKİBİ
+@api_router.get("/student/{student_id}/sources")
+async def get_student_sources(student_id: str):
+    response = supabase.table("students_sources").select("*").eq("student_id", student_id).execute()
+    return response.data
+
+@api_router.post("/student/{student_id}/sources")
+async def add_student_source(student_id: str, data: SourceUpdate):
+    record = {
+        "id": str(uuid.uuid4()),
+        "student_id": student_id,
+        "source_name": data.source_name,
+        "progress_percent": data.progress_percent,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    response = supabase.table("students_sources").insert(record).execute()
+    return response.data[0]
+
+@api_router.put("/student/sources/{source_id}")
+async def update_source_progress(source_id: str, progress: int):
+    update_data = {
+        "progress_percent": progress,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    response = supabase.table("students_sources").update(update_data).eq("id", source_id).execute()
+    return response.data[0]
+
+# 4. DETAYLI DENEME KAYDI
+@api_router.post("/student/deneme-detayli")
+async def create_detailed_exam(data: ExamDetailed):
+    # Calculate total net
+    total_net = data.net_math + data.net_science + data.net_turkish + data.net_social
+    
+    # Calculate accuracy rate (simplified)
+    accuracy_rate = (total_net / 120) * 100 if total_net > 0 else 0
+    
+    record = {
+        "id": str(uuid.uuid4()),
+        "student_id": data.student_id,
+        "tarih": data.tarih,
+        "exam_type": data.exam_type,
+        "net_math": data.net_math,
+        "net_science": data.net_science,
+        "net_turkish": data.net_turkish,
+        "net_social": data.net_social,
+        "net": total_net,
+        "accuracy_rate": accuracy_rate,
+        "sinav_tipi": data.exam_type,
+        "ders": "Toplam"
+    }
+    
+    response = supabase.table("exams").insert(record).execute()
+    return response.data[0]
+
+# 5. BİLDİRİMLER
+@api_router.get("/student/{student_id}/notifications")
+async def get_notifications(student_id: str, unread_only: bool = False):
+    query = supabase.table("notifications").select("*").eq("user_id", student_id)
+    
+    if unread_only:
+        query = query.eq("is_read", False)
+    
+    response = query.order("created_at", desc=True).limit(50).execute()
+    return response.data
+
+@api_router.put("/notifications/{notification_id}/read")
+async def mark_notification_read(notification_id: str):
+    response = supabase.table("notifications").update({"is_read": True}).eq("id", notification_id).execute()
+    return {"success": True}
+
+@api_router.post("/notifications")
+async def create_notification(data: Notification):
+    record = {
+        "id": str(uuid.uuid4()),
+        "user_id": data.user_id,
+        "type": data.type,
+        "title": data.title,
+        "message": data.message,
+        "is_read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    response = supabase.table("notifications").insert(record).execute()
+    return response.data[0]
+
+# 6. GÜNLÜK RAPOR
+@api_router.get("/student/{student_id}/reports/daily")
+async def get_daily_report(student_id: str, date: str):
+    from datetime import datetime as dt
+    
+    # Günlük soru çalışması
+    soru_response = supabase.table("soru_takip").select("*").eq("student_id", student_id).eq("date", date).execute()
+    
+    # Günlük tamamlanan görevler
+    tasks_response = supabase.table("tasks").select("*").eq("student_id", student_id).eq("tarih", date).execute()
+    
+    total_solved = sum(s["solved"] for s in soru_response.data)
+    total_correct = sum(s["correct"] for s in soru_response.data)
+    completed_tasks = [t for t in tasks_response.data if t.get("completed")]
+    
+    # En çok çalışılan ders
+    lesson_counts = {}
+    for s in soru_response.data:
+        lesson = s["lesson"]
+        lesson_counts[lesson] = lesson_counts.get(lesson, 0) + s["solved"]
+    
+    most_studied = max(lesson_counts.items(), key=lambda x: x[1])[0] if lesson_counts else "Yok"
+    
+    return {
+        "date": date,
+        "total_questions_solved": total_solved,
+        "total_correct": total_correct,
+        "accuracy_rate": (total_correct / total_solved * 100) if total_solved > 0 else 0,
+        "completed_tasks": len(completed_tasks),
+        "pending_tasks": len(tasks_response.data) - len(completed_tasks),
+        "most_studied_lesson": most_studied
+    }
+
