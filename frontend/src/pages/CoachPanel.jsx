@@ -41,10 +41,11 @@ export default function CoachPanel() {
 
         {/* Tabs */}
         <Tabs defaultValue="calendar" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="calendar" data-testid="coach-calendar-tab">Takvim</TabsTrigger>
             <TabsTrigger value="notes" data-testid="coach-notes-tab">Notlarım</TabsTrigger>
             <TabsTrigger value="books" data-testid="coach-books-tab">Kitap Önerileri</TabsTrigger>
+            <TabsTrigger value="settings" data-testid="coach-settings-tab">Ayarlar</TabsTrigger>
           </TabsList>
 
           <TabsContent value="calendar">
