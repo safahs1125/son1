@@ -87,7 +87,40 @@ export default function StudentPanel() {
 
   return (
     <div className="min-h-screen p-4 md:p-8">
+      {/* Onboarding Modal */}
+      {showOnboarding && (
+        <Onboarding
+          studentId={student.id}
+          onComplete={() => {
+            setShowOnboarding(false);
+            setRefreshKey(prev => prev + 1);
+          }}
+          onSkip={() => setShowOnboarding(false)}
+        />
+      )}
+
       <div className="max-w-7xl mx-auto page-fade-in">
+        {/* Onboarding Warning Banner */}
+        {onboardingData && !onboardingData.onboarding_completed && !showOnboarding && (
+          <Card className="p-4 mb-6 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-400">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="w-6 h-6 text-amber-600" />
+                <div>
+                  <p className="font-semibold text-amber-900">Profilin Eksik!</p>
+                  <p className="text-sm text-amber-700">Kişiselleştirilmiş çalışma planı oluşturabilmemiz için profilini tamamla.</p>
+                </div>
+              </div>
+              <Button
+                onClick={() => setShowOnboarding(true)}
+                className="bg-gradient-to-r from-amber-500 to-orange-600"
+              >
+                Tamamla
+              </Button>
+            </div>
+          </Card>
+        )}
+
         {/* Header */}
         <Card className="p-6 mb-6 gradient-card">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
