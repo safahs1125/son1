@@ -789,6 +789,168 @@ async def get_daily_report(student_id: str, date: str):
         "most_studied_lesson": most_studied
     }
 
+@api_router.get("/student/{student_id}/reports/weekly")
+async def get_weekly_report(student_id: str):
+    """
+    Son 7 günlük detaylı haftalık rapor
+    """
+    from datetime import date, timedelta
+    
+    today = date.today()
+    week_ago = today - timedelta(days=7)
+    
+    # Son 7 günlük soru takip verileri
+    soru_data = supabase.table("soru_takip").select("*").eq("student_id", student_id).gte("date", week_ago.isoformat()).lte("date", today.isoformat()).execute()
+    
+    # Günlük breakdown
+    daily_data = {}
+    for i in range(7):
+        day = today - timedelta(days=6-i)
+        daily_data[day.isoformat()] = {
+            "date": day.isoformat(),
+            "solved": 0,
+            "correct": 0,
+            "accuracy": 0,
+            "lessons": []
+        }
+    
+    # Ders bazında toplam
+    lesson_totals = {}
+    
+    for record in soru_data.data:
+        record_date = record["date"]
+        if record_date in daily_data:
+            daily_data[record_date]["solved"] += record["solved"]
+            daily_data[record_date]["correct"] += record["correct"]
+            daily_data[record_date]["lessons"].append(record["lesson"])
+        
+        # Ders toplamı
+        lesson = record["lesson"]
+        if lesson not in lesson_totals:
+            lesson_totals[lesson] = {"solved": 0, "correct": 0}
+        lesson_totals[lesson]["solved"] += record["solved"]
+        lesson_totals[lesson]["correct"] += record["correct"]
+    
+    # Günlük başarı oranlarını hesapla
+    for day_data in daily_data.values():
+        if day_data["solved"] > 0:
+            day_data["accuracy"] = round((day_data["correct"] / day_data["solved"]) * 100, 1)
+    
+    # Genel toplam
+    total_solved = sum(s["solved"] for s in soru_data.data)
+    total_correct = sum(s["correct"] for s in soru_data.data)
+    overall_accuracy = round((total_correct / total_solved * 100), 1) if total_solved > 0 else 0
+    
+    # En çok çalışılan ders
+    most_studied = max(lesson_totals.items(), key=lambda x: x[1]["solved"])[0] if lesson_totals else "Yok"
+    
+    # Trend (son 3 gün vs önceki 4 gün)
+    recent_days = list(daily_data.values())[-3:]
+    older_days = list(daily_data.values())[:4]
+    
+    recent_avg = sum(d["solved"] for d in recent_days) / 3
+    older_avg = sum(d["solved"] for d in older_days) / 4
+    
+    trend = "Yükseliş" if recent_avg > older_avg else "Düşüş" if recent_avg < older_avg else "Sabit"
+    
+    return {
+        "period": f"{week_ago.strftime('%d.%m.%Y')} - {today.strftime('%d.%m.%Y')}",
+        "summary": {
+            "total_solved": total_solved,
+            "total_correct": total_correct,
+            "accuracy_rate": overall_accuracy,
+            "most_studied_lesson": most_studied,
+            "trend": trend
+        },
+        "daily_breakdown": list(daily_data.values()),
+        "lesson_breakdown": [
+            {
+                "lesson": lesson,
+                "solved": data["solved"],
+                "correct": data["correct"],
+                "accuracy": round((data["correct"] / data["solved"] * 100), 1) if data["solved"] > 0 else 0
+            }
+            for lesson, data in lesson_totals.items()
+        ]
+    }
+
+@api_router.get("/student/{student_id}/reports/monthly")
+async def get_monthly_report(student_id: str):
+    """
+    Son 30 günlük aylık rapor
+    """
+    from datetime import date, timedelta
+    
+    today = date.today()
+    month_ago = today - timedelta(days=30)
+    
+    # Son 30 günlük soru takip verileri
+    soru_data = supabase.table("soru_takip").select("*").eq("student_id", student_id).gte("date", month_ago.isoformat()).lte("date", today.isoformat()).execute()
+    
+    # Haftalık breakdown (4 hafta)
+    weekly_data = []
+    for week in range(4):
+        week_start = today - timedelta(days=(3-week)*7 + 6)
+        week_end = today - timedelta(days=(3-week)*7)
+        
+        week_records = [r for r in soru_data.data if week_start.isoformat() <= r["date"] <= week_end.isoformat()]
+        
+        week_solved = sum(r["solved"] for r in week_records)
+        week_correct = sum(r["correct"] for r in week_records)
+        
+        weekly_data.append({
+            "week": f"Hafta {week + 1}",
+            "period": f"{week_start.strftime('%d.%m')} - {week_end.strftime('%d.%m')}",
+            "solved": week_solved,
+            "correct": week_correct,
+            "accuracy": round((week_correct / week_solved * 100), 1) if week_solved > 0 else 0
+        })
+    
+    # Ders bazında aylık toplam
+    lesson_totals = {}
+    for record in soru_data.data:
+        lesson = record["lesson"]
+        if lesson not in lesson_totals:
+            lesson_totals[lesson] = {"solved": 0, "correct": 0, "wrong": 0}
+        lesson_totals[lesson]["solved"] += record["solved"]
+        lesson_totals[lesson]["correct"] += record["correct"]
+        lesson_totals[lesson]["wrong"] += record["wrong"]
+    
+    # Genel toplam
+    total_solved = sum(s["solved"] for s in soru_data.data)
+    total_correct = sum(s["correct"] for s in soru_data.data)
+    overall_accuracy = round((total_correct / total_solved * 100), 1) if total_solved > 0 else 0
+    
+    # İlerleme (ilk 2 hafta vs son 2 hafta)
+    first_half = weekly_data[:2]
+    second_half = weekly_data[2:]
+    
+    first_avg = sum(w["solved"] for w in first_half) / 2
+    second_avg = sum(w["solved"] for w in second_half) / 2
+    
+    improvement = round(((second_avg - first_avg) / first_avg * 100), 1) if first_avg > 0 else 0
+    
+    return {
+        "period": f"{month_ago.strftime('%d.%m.%Y')} - {today.strftime('%d.%m.%Y')}",
+        "summary": {
+            "total_solved": total_solved,
+            "total_correct": total_correct,
+            "accuracy_rate": overall_accuracy,
+            "improvement_rate": improvement
+        },
+        "weekly_breakdown": weekly_data,
+        "lesson_breakdown": [
+            {
+                "lesson": lesson,
+                "solved": data["solved"],
+                "correct": data["correct"],
+                "wrong": data["wrong"],
+                "accuracy": round((data["correct"] / data["solved"] * 100), 1) if data["solved"] > 0 else 0
+            }
+            for lesson, data in lesson_totals.items()
+        ]
+    }
+
 # ====================================
 # FAZ 2: ANALİZ MOTORU
 # ====================================
