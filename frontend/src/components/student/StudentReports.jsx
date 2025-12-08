@@ -51,7 +51,7 @@ export default function StudentReports({ studentId }) {
         {weeklyReport && (
           <div className="space-y-6">
             {/* Özet Kartlar */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300">
                 <div className="flex items-center gap-2 mb-2">
                   <BookOpen className="w-5 h-5 text-blue-600" />
@@ -147,7 +147,7 @@ export default function StudentReports({ studentId }) {
         {monthlyReport && (
           <div className="space-y-6">
             {/* Özet Kartlar */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300">
                 <div className="flex items-center gap-2 mb-2">
                   <BookOpen className="w-5 h-5 text-blue-600" />
