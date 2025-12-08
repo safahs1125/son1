@@ -86,8 +86,9 @@ export default function CoachPanel() {
 
         {/* Tabs */}
         <Tabs defaultValue="analysis" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6">
+          <TabsList className="grid w-full grid-cols-7 mb-6">
             <TabsTrigger value="analysis" data-testid="coach-analysis-tab">Öğrenci Analizi</TabsTrigger>
+            <TabsTrigger value="exam-overview" data-testid="coach-exam-overview-tab">Deneme Analizleri</TabsTrigger>
             <TabsTrigger value="reports" data-testid="coach-reports-tab">Haftalık Rapor</TabsTrigger>
             <TabsTrigger value="calendar" data-testid="coach-calendar-tab">Takvim</TabsTrigger>
             <TabsTrigger value="notes" data-testid="coach-notes-tab">Notlarım</TabsTrigger>
@@ -97,6 +98,10 @@ export default function CoachPanel() {
 
           <TabsContent value="analysis">
             <StudentsAnalysisTab />
+          </TabsContent>
+
+          <TabsContent value="exam-overview">
+            <CoachExamOverview />
           </TabsContent>
 
           <TabsContent value="reports">
