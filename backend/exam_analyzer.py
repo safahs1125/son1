@@ -15,6 +15,74 @@ class ExamAnalyzer:
     def __init__(self, api_key: str):
         self.api_key = api_key
     
+    async def analyze_exam_text(self, exam_data: Dict) -> Dict:
+        """
+        Manuel girilen deneme verilerini AI ile analiz eder
+        
+        Args:
+            exam_data: {
+                "exam_name": str,
+                "exam_type": "TYT" | "AYT",
+                "subjects": [{name, total, correct, wrong, blank, topics: [...]}]
+            }
+            
+        Returns:
+            AI analiz sonuçları
+        """
+        
+        # Veriyi metin formatına çevir
+        text_data = f"Deneme Adı: {exam_data.get('exam_name', '')}\n"
+        text_data += f"Deneme Türü: {exam_data.get('exam_type', 'TYT')}\n\n"
+        text_data += "DERS BAZLI SONUÇLAR:\n"
+        
+        for subject in exam_data.get('subjects', []):
+            net = subject['correct'] - (subject['wrong'] / 4.0)
+            text_data += f"\n{subject['name']}:\n"
+            text_data += f"  Toplam: {subject['total']}, Doğru: {subject['correct']}, "
+            text_data += f"Yanlış: {subject['wrong']}, Boş: {subject['blank']}, Net: {net:.2f}\n"
+            
+            if subject.get('topics'):
+                text_data += "  Konu Bazlı:\n"
+                for topic in subject['topics']:
+                    text_data += f"    - {topic['name']}: {topic['total']} soru, "
+                    text_data += f"{topic['correct']}D {topic['wrong']}Y {topic['blank']}B\n"
+        
+        # AI chat oluştur
+        chat = LlmChat(
+            api_key=self.api_key,
+            session_id=f"exam-analysis-{datetime.now().timestamp()}",
+            system_message="""Sen bir TYT-AYT deneme sonuç analiz asistanısın. 
+            Verilen deneme sonuçlarını analiz et ve şunları yap:
+            
+            1. Zayıf konuları belirle (başarı oranı %60 altı veya 3+ yanlış)
+            2. Güçlü konuları belirle (başarı oranı %80 üstü)
+            3. Kısa ve öz çalışma önerileri sun (maksimum 5 madde)
+            4. Genel başarı değerlendirmesi yap
+            
+            KISA VE ÖZ YANIT VER. Maksimum 200 kelime.
+            JSON formatında yanıt verme, düz metin olarak yaz."""
+        ).with_model("openai", "gpt-4o-mini")
+        
+        try:
+            user_message = UserMessage(
+                text=f"Bu deneme sonuçlarını analiz et:\n\n{text_data}"
+            )
+            
+            response = await chat.send_message(user_message)
+            
+            return {
+                "success": True,
+                "ai_analysis": response.strip(),
+                "raw_input": text_data
+            }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e),
+                "ai_analysis": "AI analizi yapılamadı."
+            }
+    
     def calculate_net_from_manual(self, subject_data: List[Dict]) -> Dict:
         """
         Manuel girilen verilerden net hesaplar
