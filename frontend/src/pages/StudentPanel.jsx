@@ -163,6 +163,7 @@ export default function StudentPanel() {
 
             <div className="flex gap-3">
               <SoruTakip studentId={student.id} />
+              <BransTaramaTesti studentId={student.id} />
               <Button
                 variant="outline"
                 onClick={handleRefresh}
