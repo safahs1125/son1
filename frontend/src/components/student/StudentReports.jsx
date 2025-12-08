@@ -10,6 +10,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export default function StudentReports({ studentId }) {
   const [weeklyReport, setWeeklyReport] = useState(null);
   const [monthlyReport, setMonthlyReport] = useState(null);
+  const [topicDetails, setTopicDetails] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,13 +19,15 @@ export default function StudentReports({ studentId }) {
 
   const fetchReports = async () => {
     try {
-      const [weekly, monthly] = await Promise.all([
+      const [weekly, monthly, soruTakip] = await Promise.all([
         axios.get(`${BACKEND_URL}/api/student/${studentId}/reports/weekly`),
-        axios.get(`${BACKEND_URL}/api/student/${studentId}/reports/monthly`)
+        axios.get(`${BACKEND_URL}/api/student/${studentId}/reports/monthly`),
+        axios.get(`${BACKEND_URL}/api/student/${studentId}/soru-takip`)
       ]);
       
       setWeeklyReport(weekly.data);
       setMonthlyReport(monthly.data);
+      setTopicDetails(soruTakip.data);
     } catch (error) {
       console.error('Reports fetch error:', error);
     } finally {
