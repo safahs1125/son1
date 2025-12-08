@@ -8,6 +8,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 export default function StudentExamsView({ studentId }) {
   const [exams, setExams] = useState([]);
+  const [manualExams, setManualExams] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,8 +17,13 @@ export default function StudentExamsView({ studentId }) {
 
   const fetchExams = async () => {
     try {
-      const response = await axios.get(`${BACKEND_URL}/api/exams/${studentId}`);
-      setExams(response.data);
+      // Eski exams tablosundan
+      const oldExamsResponse = await axios.get(`${BACKEND_URL}/api/exams/${studentId}`);
+      setExams(oldExamsResponse.data);
+      
+      // Yeni manuel girişlerden
+      const manualExamsResponse = await axios.get(`${BACKEND_URL}/api/exam/student-exams/${studentId}`);
+      setManualExams(manualExamsResponse.data);
     } catch (error) {
       toast.error('Denemeler yüklenemedi');
     } finally {
