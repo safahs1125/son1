@@ -173,6 +173,149 @@ export default function StudentExamsView({ studentId }) {
           <p className="text-gray-500">Henüz deneme eklenmemiş</p>
         </Card>
       )}
+
+      {/* Detay Modalı */}
+      <Dialog open={detailModalOpen} onOpenChange={setDetailModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Deneme Detayları</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setDetailModalOpen(false)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedExam && (
+            <div className="space-y-6 mt-4">
+              {/* Manuel Deneme Detayı */}
+              {selectedExam.upload && (() => {
+                const upload = selectedExam.upload;
+                const analysis = selectedExam.analysis;
+                let subjects = [];
+                try {
+                  if (analysis && analysis.subject_breakdown) {
+                    subjects = JSON.parse(analysis.subject_breakdown);
+                  }
+                } catch (e) {
+                  console.error('Parse error:', e);
+                }
+
+                return (
+                  <>
+                    {/* Deneme Bilgisi */}
+                    <Card className="p-4 bg-gradient-to-r from-amber-50 to-orange-50">
+                      <h3 className="text-xl font-bold text-gray-800">{upload.exam_name}</h3>
+                      <p className="text-gray-600 flex items-center gap-2 mt-1">
+                        <Calendar className="w-4 h-4" />
+                        {new Date(upload.exam_date).toLocaleDateString('tr-TR')}
+                      </p>
+                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mt-2 ${
+                        upload.analysis_status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {upload.analysis_status === 'completed' ? '✓ Analiz Tamamlandı' : 'Analiz Bekleniyor'}
+                      </span>
+                    </Card>
+
+                    {/* Toplam Net */}
+                    {analysis && (
+                      <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300">
+                        <div className="flex items-center gap-4">
+                          <Award className="w-12 h-12 text-green-600" />
+                          <div>
+                            <p className="text-sm text-gray-600">Toplam Net</p>
+                            <p className="text-4xl font-bold text-green-600">{analysis.total_net?.toFixed(2) || '0.00'}</p>
+                          </div>
+                        </div>
+                      </Card>
+                    )}
+
+                    {/* Ders Netleri */}
+                    {subjects.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold text-gray-800 mb-3">Ders Bazlı Sonuçlar</h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                          {subjects.map((subject, sidx) => (
+                            <Card key={sidx} className="p-4 bg-white shadow-sm">
+                              <p className="text-sm font-semibold text-gray-800 mb-1">{subject.name}</p>
+                              <p className="text-2xl font-bold text-amber-600">
+                                {subject.net?.toFixed(2) || (subject.correct - subject.wrong / 4).toFixed(2)}
+                              </p>
+                              <p className="text-xs text-gray-600 mt-1">
+                                D:{subject.correct} Y:{subject.wrong} B:{subject.blank || 0}
+                              </p>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* AI Önerileri */}
+                    {analysis?.recommendations && upload.analysis_status === 'completed' && (
+                      <div>
+                        <h4 className="font-semibold text-gray-800 mb-3">Öneriler</h4>
+                        <Card className="p-4 bg-blue-50 border border-blue-200">
+                          <p className="text-sm text-gray-700 whitespace-pre-wrap">{analysis.recommendations}</p>
+                        </Card>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+
+              {/* Eski Deneme Detayı */}
+              {selectedExam.oldExam && (() => {
+                const exam = selectedExam.oldExam;
+                const totalNet = exam.subjects.reduce((sum, s) => sum + s.net, 0);
+
+                return (
+                  <>
+                    {/* Deneme Bilgisi */}
+                    <Card className="p-4 bg-gradient-to-r from-amber-50 to-orange-50">
+                      <h3 className="text-xl font-bold text-gray-800">{exam.type} Denemesi</h3>
+                      <p className="text-gray-600 flex items-center gap-2 mt-1">
+                        <Calendar className="w-4 h-4" />
+                        {new Date(exam.date).toLocaleDateString('tr-TR')}
+                      </p>
+                    </Card>
+
+                    {/* Toplam Net */}
+                    <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300">
+                      <div className="flex items-center gap-4">
+                        <Award className="w-12 h-12 text-green-600" />
+                        <div>
+                          <p className="text-sm text-gray-600">Toplam Net</p>
+                          <p className="text-4xl font-bold text-green-600">{totalNet.toFixed(2)}</p>
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Ders Netleri */}
+                    <div>
+                      <h4 className="font-semibold text-gray-800 mb-3">Ders Bazlı Sonuçlar</h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        {exam.subjects.map((subject) => (
+                          <Card key={subject.id} className="p-4 bg-white shadow-sm">
+                            <p className="text-sm font-semibold text-gray-800 mb-1">{subject.ders}</p>
+                            <p className="text-2xl font-bold text-amber-600">{subject.net.toFixed(2)}</p>
+                            <p className="text-xs text-gray-600 mt-1">
+                              D:{subject.dogru} Y:{subject.yanlis}
+                            </p>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
