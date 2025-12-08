@@ -12,6 +12,7 @@ import CoachNotes from '@/components/coach/CoachNotes';
 import BookRecommendations from '@/components/coach/BookRecommendations';
 import StudentsAnalysisTab from '@/components/coach/StudentsAnalysisTab';
 import CoachWeeklyReport from '@/components/coach/CoachWeeklyReport';
+import CoachExamOverview from '@/components/coach/CoachExamOverview';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
