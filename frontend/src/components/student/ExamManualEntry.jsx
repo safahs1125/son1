@@ -286,7 +286,7 @@ export default function ExamManualEntry({ studentId, onComplete }) {
         ) : (
           <>
             <Save className="w-5 h-5 mr-2" />
-            Kaydet ve Analiz Et
+            Kaydet
           </>
         )}
       </Button>
