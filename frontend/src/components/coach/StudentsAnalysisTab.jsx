@@ -20,6 +20,9 @@ export default function StudentsAnalysisTab() {
     title: '',
     message: ''
   });
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedStudentDetail, setSelectedStudentDetail] = useState(null);
+  const [studentDetailData, setStudentDetailData] = useState(null);
 
   useEffect(() => {
     fetchAnalysis();
