@@ -1194,67 +1194,46 @@ class TopicProgressUpdate(BaseModel):
 
 # Analyzer instance
 exam_analyzer = ExamAnalyzer(api_key=os.environ.get('EMERGENT_LLM_KEY', ''))
-            
-            # exam_analysis tablosuna kaydet
-            analysis_record = {
-                "id": str(uuid.uuid4()),
-                "upload_id": upload_id,
-                "student_id": student_id,
-                "total_net": analysis_data.get("total_net", 0),
-                "subject_breakdown": json.dumps(analysis_data.get("subjects", [])),
-                "topic_breakdown": json.dumps(analysis_data.get("topics", [])),
-                "weak_topics": json.dumps(weak_topics),
-                "recommendations": recommendations,
-                "ai_raw_response": analysis_result.get("raw_response", ""),
-                "created_at": datetime.now(timezone.utc).isoformat()
-            }
-            
-            supabase.table("exam_analysis").insert(analysis_record).execute()
-            
-            # Upload status güncelle
-            supabase.table("exam_uploads").update({"analysis_status": "completed"}).eq("id", upload_id).execute()
-            
-            # Bildirim gönder
-            notification_record = {
-                "id": str(uuid.uuid4()),
-                "user_id": student_id,
-                "type": "success",
-                "title": "Deneme Analizi Tamamlandı",
-                "message": f"{exam_name} denemesi başarıyla analiz edildi. Toplam net: {analysis_data.get('total_net', 0)}",
-                "is_read": False,
-                "created_at": datetime.now(timezone.utc).isoformat()
-            }
-            supabase.table("notifications").insert(notification_record).execute()
-            
-            return {
-                "success": True,
-                "upload_id": upload_id,
-                "analysis": analysis_data,
-                "recommendations": recommendations
-            }
-        else:
-            # Analiz başarısız
-            supabase.table("exam_uploads").update({"analysis_status": "failed"}).eq("id", upload_id).execute()
-            
-            return {
-                "success": False,
-                "error": analysis_result.get("error", "Analiz başarısız"),
-                "upload_id": upload_id
-            }
-            
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/exam/manual-entry")
 async def manual_exam_entry(entry: ManualExamEntry):
     """
-    Manuel deneme sonucu girişi
+    Manuel deneme sonucu girişi + AI metin analizi
     """
     try:
         # Net hesapla
         calculation = exam_analyzer.calculate_net_from_manual(entry.subjects)
         
-        # exam_uploads tablosuna kaydet (manuel)
+        # Zayıf konuları belirle
+        weak_topics = []
+        strong_topics = []
+        
+        for subject in entry.subjects:
+            for topic in subject.get('topics', []):
+                total = topic.get('total', 0)
+                correct = topic.get('correct', 0)
+                wrong = topic.get('wrong', 0)
+                
+                if total > 0:
+                    accuracy = (correct / total) * 100
+                    topic_info = f"{subject['name']} - {topic['name']}"
+                    
+                    if accuracy < 60 or wrong >= 3:
+                        weak_topics.append(topic_info)
+                    elif accuracy >= 80:
+                        strong_topics.append(topic_info)
+        
+        # AI analiz yap (arka planda)
+        exam_data = {
+            "exam_name": entry.exam_name,
+            "exam_type": entry.exam_type,
+            "subjects": entry.subjects
+        }
+        
+        ai_result = await exam_analyzer.analyze_exam_text(exam_data)
+        ai_analysis = ai_result.get("ai_analysis", "Analiz yapılamadı")
+        
+        # exam_uploads tablosuna kaydet
         upload_record = {
             "id": str(uuid.uuid4()),
             "student_id": entry.student_id,
@@ -1277,19 +1256,34 @@ async def manual_exam_entry(entry: ManualExamEntry):
             "student_id": entry.student_id,
             "total_net": calculation["total_net"],
             "subject_breakdown": json.dumps(calculation["subjects"]),
-            "topic_breakdown": json.dumps([]),
-            "weak_topics": json.dumps([]),
-            "recommendations": "Manuel girişte detaylı analiz yapılamıyor. Lütfen PDF/görsel yükleyiniz.",
-            "ai_raw_response": "Manuel giriş",
+            "topic_breakdown": json.dumps(entry.subjects),  # Konu bazlı veri
+            "weak_topics": json.dumps(weak_topics),
+            "recommendations": ai_analysis,  # AI önerileri
+            "ai_raw_response": json.dumps(exam_data),
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         
         supabase.table("exam_analysis").insert(analysis_record).execute()
         
+        # Bildirim gönder
+        notification_record = {
+            "id": str(uuid.uuid4()),
+            "user_id": entry.student_id,
+            "type": "success",
+            "title": "Deneme Kaydedildi",
+            "message": f"{entry.exam_name} denemesi başarıyla kaydedildi. Toplam net: {calculation['total_net']}",
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        supabase.table("notifications").insert(notification_record).execute()
+        
         return {
             "success": True,
             "upload_id": upload_id,
-            "calculation": calculation
+            "calculation": calculation,
+            "weak_topics": weak_topics,
+            "strong_topics": strong_topics,
+            "ai_analysis": ai_analysis
         }
         
     except Exception as e:
