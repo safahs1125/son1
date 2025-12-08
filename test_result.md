@@ -515,3 +515,57 @@ agent_communication:
 ✅ Koç paneli fonksiyonları bozulmadı
 ✅ Sadece öğrenci paneline yeni UI/UX eklendi
 
+---
+
+## Test Results - Manuel Deneme Girişi ve Koç Bildirimi - 8 Aralık 2025
+
+backend:
+  - task: "Manuel Deneme Girişi API"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ API endpoint /api/exam/manual-entry tamamen çalışıyor. Test senaryosu: Öğrenci 'hgfgd' için 'Test Denemesi API' denemesi başarıyla kaydedildi. Toplam net: 51.25 (Türkçe: 28.75, Matematik: 22.5). Upload ID: 813d58ca-ccce-477d-b8be-d860f5679942 döndü. Response: success=true, calculation objesi doğru."
+        
+  - task: "Koç Bildirim Sistemi"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ API endpoint /api/student/coach/notifications çalışıyor. Manuel deneme girişi sonrası koça otomatik bildirim gönderildi. Bildirim detayları: user_id='coach', title='Yeni Deneme Girişi', message='hgfgd yeni bir deneme girişi yaptı: Test Denemesi API (Net: 51.25)', type='info'. Bildirim sistemi tam otomatik çalışıyor."
+        
+  - task: "Öğrenci Deneme Listesi API"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ API endpoint /api/exam/student-exams/{student_id} çalışıyor. Yeni girilen deneme listede görünüyor: exam_name='Test Denemesi API', exam_date='2024-12-15', analysis_status='pending', total_net=51.25. Deneme kayıtları doğru şekilde saklanıyor ve listeleniyor."
+
+test_plan:
+  current_focus:
+    - "Manuel Deneme Girişi API"
+    - "Koç Bildirim Sistemi"
+    - "Öğrenci Deneme Listesi API"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "testing"
+    message: "✅ MANUEL DENEME GİRİŞİ VE KOÇ BİLDİRİMİ TEST TAMAMLANDI. TÜM API ENDPOINT'LERİ ÇALIŞIYOR: 1) /api/exam/manual-entry - Manuel deneme girişi başarılı, doğru net hesaplama (51.25), upload_id döndürüyor ✅, 2) /api/student/coach/notifications - Koça otomatik bildirim gönderiliyor, doğru format ve içerik ✅, 3) /api/exam/student-exams/{id} - Yeni deneme listede görünüyor, analysis_status='pending' ✅. Test öğrencisi: hgfgd (ID: 7358b3b1-7020-40ac-bda3-e67ffe9a9bfe). Tüm beklenen davranışlar doğrulandı."
+
