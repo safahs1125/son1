@@ -87,15 +87,15 @@ export default function CoachPanel() {
 
         {/* Tabs */}
         <Tabs defaultValue="analysis" className="w-full">
-          <TabsList className="grid w-full grid-cols-8 mb-6">
-            <TabsTrigger value="analysis" data-testid="coach-analysis-tab">Öğrenci Analizi</TabsTrigger>
-            <TabsTrigger value="exam-overview" data-testid="coach-exam-overview-tab">Deneme Analizleri</TabsTrigger>
-            <TabsTrigger value="reports" data-testid="coach-reports-tab">Haftalık Rapor</TabsTrigger>
-            <TabsTrigger value="notifications" data-testid="coach-notifications-tab">Bildirimler</TabsTrigger>
-            <TabsTrigger value="calendar" data-testid="coach-calendar-tab">Takvim</TabsTrigger>
-            <TabsTrigger value="notes" data-testid="coach-notes-tab">Notlarım</TabsTrigger>
-            <TabsTrigger value="books" data-testid="coach-books-tab">Kitap Önerileri</TabsTrigger>
-            <TabsTrigger value="settings" data-testid="coach-settings-tab">Ayarlar</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 mb-6 gap-1">
+            <TabsTrigger value="analysis" data-testid="coach-analysis-tab" className="text-xs sm:text-sm">Analiz</TabsTrigger>
+            <TabsTrigger value="exam-overview" data-testid="coach-exam-overview-tab" className="text-xs sm:text-sm">Denemeler</TabsTrigger>
+            <TabsTrigger value="reports" data-testid="coach-reports-tab" className="text-xs sm:text-sm">Rapor</TabsTrigger>
+            <TabsTrigger value="notifications" data-testid="coach-notifications-tab" className="text-xs sm:text-sm">Bildirim</TabsTrigger>
+            <TabsTrigger value="calendar" data-testid="coach-calendar-tab" className="text-xs sm:text-sm">Takvim</TabsTrigger>
+            <TabsTrigger value="notes" data-testid="coach-notes-tab" className="text-xs sm:text-sm">Notlar</TabsTrigger>
+            <TabsTrigger value="books" data-testid="coach-books-tab" className="text-xs sm:text-sm">Kitaplar</TabsTrigger>
+            <TabsTrigger value="settings" data-testid="coach-settings-tab" className="text-xs sm:text-sm">Ayarlar</TabsTrigger>
           </TabsList>
 
           <TabsContent value="analysis">
