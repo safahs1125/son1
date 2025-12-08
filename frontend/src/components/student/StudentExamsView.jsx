@@ -51,6 +51,11 @@ export default function StudentExamsView({ studentId }) {
     return Object.values(grouped);
   };
 
+  const openDetailModal = (exam) => {
+    setSelectedExam(exam);
+    setDetailModalOpen(true);
+  };
+
   if (loading) {
     return <div className="flex justify-center p-8"><div className="loading-spinner"></div></div>;
   }
