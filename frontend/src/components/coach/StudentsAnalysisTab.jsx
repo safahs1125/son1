@@ -84,6 +84,26 @@ export default function StudentsAnalysisTab() {
     }
   };
 
+  const openStudentDetail = async (student) => {
+    setSelectedStudentDetail(student);
+    setDetailModalOpen(true);
+    
+    try {
+      // Soru takip ve branş tarama verilerini getir
+      const [soruTakip, bransTarama] = await Promise.all([
+        axios.get(`${BACKEND_URL}/api/student/${student.student_id}/soru-takip`),
+        axios.get(`${BACKEND_URL}/api/student/${student.student_id}/brans-tarama`)
+      ]);
+      
+      setStudentDetailData({
+        soruTakip: soruTakip.data,
+        bransTarama: bransTarama.data
+      });
+    } catch (error) {
+      toast.error('Detay verisi yüklenemedi');
+    }
+  };
+
   if (loading) {
     return <div className="text-center text-gray-500">Analiz yükleniyor...</div>;
   }
