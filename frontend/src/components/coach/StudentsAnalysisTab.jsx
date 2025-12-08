@@ -117,7 +117,7 @@ export default function StudentsAnalysisTab() {
   return (
     <div className="space-y-6">
       {/* Özet Kartlar */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
         <Card className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300">
           <div className="flex items-center gap-3 mb-2">
             <Users className="w-8 h-8 text-blue-600" />
