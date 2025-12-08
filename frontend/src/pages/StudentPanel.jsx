@@ -8,7 +8,6 @@ import { LogOut, RefreshCw, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import StudentTasksTab from '@/components/student/StudentTasksTab';
 import StudentTopicsView from '@/components/student/StudentTopicsView';
-import StudentExamsView from '@/components/student/StudentExamsView';
 import StudentCalendarTab from '@/components/student/StudentCalendarTab';
 import Last7DaysSummary from '@/components/student/Last7DaysSummary';
 import Onboarding from '@/components/student/Onboarding';
@@ -17,9 +16,7 @@ import BransTaramaTesti from '@/components/student/BransTaramaTesti';
 import Notifications from '@/components/student/Notifications';
 import StudentAnalysis from '@/components/student/StudentAnalysis';
 import StudentReports from '@/components/student/StudentReports';
-import ExamManualEntry from '@/components/student/ExamManualEntry';
 import ExamAnalysisView from '@/components/student/ExamAnalysisView';
-import TopicProgressManager from '@/components/student/TopicProgressManager';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
