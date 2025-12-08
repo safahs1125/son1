@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Header
+from fastapi import FastAPI, APIRouter, HTTPException, Header, UploadFile, File
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 import os
@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 import bcrypt
 from supabase import create_client, Client
 from tyt_ayt_topics import TYT_TOPICS, AYT_SAYISAL, AYT_ESIT_AGIRLIK, AYT_SOZEL
+from exam_analyzer import ExamAnalyzer
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
