@@ -330,7 +330,7 @@ test_plan:
 - Öğrenci Token: a433c2fd-a01e-4219-a56f-4d1118de0eb6 ✅
 - Koç Şifresi: coach2025 ✅
 
-**Test URL:** https://turkish-coach-1.preview.emergentagent.com ✅
+**Test URL:** https://edutracker-104.preview.emergentagent.com ✅
 
 **Sonuç:** Tüm analiz modülü özellikleri başarıyla çalışıyor. Faz 2 analiz modülü test gereksinimlerini karşılıyor.
 
