@@ -69,6 +69,7 @@ CREATE INDEX idx_brans_tarama_date ON brans_tarama(date);
 ALTER TABLE exam_uploads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE exam_analysis ENABLE ROW LEVEL SECURITY;
 ALTER TABLE topic_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE brans_tarama ENABLE ROW LEVEL SECURITY;
 
 -- exam_uploads policies
 CREATE POLICY "Users can view their own uploads" ON exam_uploads
@@ -90,3 +91,10 @@ CREATE POLICY "Students can view their own progress" ON topic_progress
 
 CREATE POLICY "Students can update their own progress" ON topic_progress
     FOR ALL USING (true);
+
+-- brans_tarama policies
+CREATE POLICY "Users can view their own tests" ON brans_tarama
+    FOR SELECT USING (true);
+
+CREATE POLICY "Users can insert their own tests" ON brans_tarama
+    FOR INSERT WITH CHECK (true);
