@@ -206,10 +206,7 @@ export default function StudentPanel() {
           </TabsContent>
 
           <TabsContent value="exam-analysis">
-            <div className="space-y-6">
-              <ExamManualEntry studentId={student.id} onComplete={handleRefresh} />
-              <ExamAnalysisView studentId={student.id} />
-            </div>
+            <ExamAnalysisView studentId={student.id} />
           </TabsContent>
 
           <TabsContent value="analysis">
@@ -222,10 +219,6 @@ export default function StudentPanel() {
 
           <TabsContent value="topics">
             <StudentTopicsView studentId={student.id} />
-          </TabsContent>
-
-          <TabsContent value="exams">
-            <StudentExamsView studentId={student.id} />
           </TabsContent>
 
           <TabsContent value="notifications">
