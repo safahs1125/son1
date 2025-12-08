@@ -65,7 +65,7 @@ export default function StudentExamsView({ studentId }) {
       {/* Deneme Giriş Formu */}
       <ExamManualEntry studentId={studentId} onComplete={fetchExams} />
       
-      {/* Manuel Girişli Denemeler */}
+      {/* Manuel Girişli Denemeler - Liste Görünümü */}
       {manualExams.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-lg font-bold text-gray-800">Girilen Denemeler</h3>
@@ -74,44 +74,51 @@ export default function StudentExamsView({ studentId }) {
             const analysis = item.analysis;
             
             return (
-              <Card key={idx} className="p-6 gradient-card" data-testid={`manual-exam-card-${idx}`}>
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-800">{upload.exam_name}</h3>
-                    <p className="text-sm text-gray-600">{new Date(upload.exam_date).toLocaleDateString('tr-TR')}</p>
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mt-2 ${
-                      upload.analysis_status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {upload.analysis_status === 'completed' ? 'Analiz Tamamlandı' : 'Analiz Bekleniyor'}
-                    </span>
+              <Card key={idx} className="p-4 gradient-card hover:shadow-lg transition-shadow" data-testid={`manual-exam-card-${idx}`}>
+                <div className="flex items-center justify-between">
+                  {/* Deneme Bilgisi */}
+                  <div className="flex-1">
+                    <h3 className="font-bold text-gray-800">{upload.exam_name}</h3>
+                    <div className="flex items-center gap-3 text-sm text-gray-600 mt-1">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {new Date(upload.exam_date).toLocaleDateString('tr-TR')}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-600">Toplam Net</p>
-                    <p className="text-3xl font-bold text-amber-600">{analysis?.total_net?.toFixed(2) || '0.00'}</p>
+
+                  {/* Net Skoru */}
+                  {analysis && (
+                    <div className="text-center px-4">
+                      <p className="text-xs text-gray-600">Net</p>
+                      <p className="text-2xl font-bold text-amber-600">{analysis.total_net?.toFixed(2) || '0.00'}</p>
+                    </div>
+                  )}
+
+                  {/* Durum Badge */}
+                  <div className="flex flex-col items-end gap-2">
+                    {upload.analysis_status === 'completed' ? (
+                      <span className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full font-semibold">
+                        ✓ Analiz Tamamlandı
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full font-semibold">
+                        Analiz Bekleniyor
+                      </span>
+                    )}
                   </div>
+
+                  {/* Detay Butonu */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openDetailModal(item)}
+                    className="ml-3"
+                  >
+                    <Eye className="w-4 h-4 mr-1" />
+                    Detay
+                  </Button>
                 </div>
-
-                {analysis && analysis.subject_breakdown && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {JSON.parse(analysis.subject_breakdown).map((subject, subIdx) => (
-                      <div key={subIdx} className="p-3 bg-white rounded-lg shadow-sm">
-                        <p className="font-medium text-gray-800 mb-2">{subject.name}</p>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-green-600">D: {subject.correct}</span>
-                          <span className="text-red-600">Y: {subject.wrong}</span>
-                          <span className="font-bold text-amber-600">Net: {subject.net.toFixed(2)}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {upload.analysis_status === 'completed' && analysis?.recommendations && (
-                  <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                    <p className="text-sm font-semibold text-blue-900 mb-2">Öneriler:</p>
-                    <p className="text-sm text-blue-800">{analysis.recommendations}</p>
-                  </div>
-                )}
               </Card>
             );
           })}
