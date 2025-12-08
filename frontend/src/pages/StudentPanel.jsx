@@ -16,6 +16,8 @@ import SoruTakip from '@/components/student/SoruTakip';
 import Notifications from '@/components/student/Notifications';
 import StudentAnalysis from '@/components/student/StudentAnalysis';
 import StudentReports from '@/components/student/StudentReports';
+import ExamUploader from '@/components/student/ExamUploader';
+import ExamAnalysisView from '@/components/student/ExamAnalysisView';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
