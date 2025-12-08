@@ -1198,40 +1198,11 @@ exam_analyzer = ExamAnalyzer(api_key=os.environ.get('EMERGENT_LLM_KEY', ''))
 @api_router.post("/exam/manual-entry")
 async def manual_exam_entry(entry: ManualExamEntry):
     """
-    Manuel deneme sonucu girişi + AI metin analizi
+    Manuel deneme sonucu girişi (AI analizi YOK - koç tarafından tetiklenecek)
     """
     try:
         # Net hesapla
         calculation = exam_analyzer.calculate_net_from_manual(entry.subjects)
-        
-        # Zayıf konuları belirle
-        weak_topics = []
-        strong_topics = []
-        
-        for subject in entry.subjects:
-            for topic in subject.get('topics', []):
-                total = topic.get('total', 0)
-                correct = topic.get('correct', 0)
-                wrong = topic.get('wrong', 0)
-                
-                if total > 0:
-                    accuracy = (correct / total) * 100
-                    topic_info = f"{subject['name']} - {topic['name']}"
-                    
-                    if accuracy < 60 or wrong >= 3:
-                        weak_topics.append(topic_info)
-                    elif accuracy >= 80:
-                        strong_topics.append(topic_info)
-        
-        # AI analiz yap (arka planda)
-        exam_data = {
-            "exam_name": entry.exam_name,
-            "exam_type": entry.exam_type,
-            "subjects": entry.subjects
-        }
-        
-        ai_result = await exam_analyzer.analyze_exam_text(exam_data)
-        ai_analysis = ai_result.get("ai_analysis", "Analiz yapılamadı")
         
         # exam_uploads tablosuna kaydet
         upload_record = {
@@ -1242,24 +1213,28 @@ async def manual_exam_entry(entry: ManualExamEntry):
             "file_type": "manual",
             "exam_date": entry.exam_date,
             "exam_name": entry.exam_name,
-            "analysis_status": "completed",
+            "analysis_status": "pending",  # Analiz bekliyor
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         
         upload_response = supabase.table("exam_uploads").insert(upload_record).execute()
         upload_id = upload_response.data[0]["id"]
         
-        # exam_analysis tablosuna kaydet
+        # exam_analysis tablosuna temel veriyi kaydet (AI analizi sonra)
         analysis_record = {
             "id": str(uuid.uuid4()),
             "upload_id": upload_id,
             "student_id": entry.student_id,
             "total_net": calculation["total_net"],
             "subject_breakdown": json.dumps(calculation["subjects"]),
-            "topic_breakdown": json.dumps(entry.subjects),  # Konu bazlı veri
-            "weak_topics": json.dumps(weak_topics),
-            "recommendations": ai_analysis,  # AI önerileri
-            "ai_raw_response": json.dumps(exam_data),
+            "topic_breakdown": json.dumps(entry.subjects),
+            "weak_topics": json.dumps([]),
+            "recommendations": "Analiz bekleniyor. Koç tarafından analiz edilecek.",
+            "ai_raw_response": json.dumps({
+                "exam_name": entry.exam_name,
+                "exam_type": entry.exam_type,
+                "subjects": entry.subjects
+            }),
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         
@@ -1280,7 +1255,81 @@ async def manual_exam_entry(entry: ManualExamEntry):
         return {
             "success": True,
             "upload_id": upload_id,
-            "calculation": calculation,
+            "calculation": calculation
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/exam/trigger-analysis/{upload_id}")
+async def trigger_analysis(upload_id: str):
+    """
+    Koç tarafından AI analizi tetikleme
+    """
+    try:
+        # Upload kaydını bul
+        upload = supabase.table("exam_uploads").select("*").eq("id", upload_id).execute()
+        if not upload.data:
+            raise HTTPException(status_code=404, detail="Deneme bulunamadı")
+        
+        upload_data = upload.data[0]
+        
+        # Mevcut analizi bul
+        analysis = supabase.table("exam_analysis").select("*").eq("upload_id", upload_id).execute()
+        if not analysis.data:
+            raise HTTPException(status_code=404, detail="Analiz kaydı bulunamadı")
+        
+        analysis_data = analysis.data[0]
+        
+        # AI analiz yap
+        exam_data = json.loads(analysis_data["ai_raw_response"])
+        ai_result = await exam_analyzer.analyze_exam_text(exam_data)
+        ai_analysis = ai_result.get("ai_analysis", "Analiz yapılamadı")
+        
+        # Zayıf konuları belirle
+        weak_topics = []
+        strong_topics = []
+        
+        for subject in exam_data.get('subjects', []):
+            for topic in subject.get('topics', []):
+                total = topic.get('total', 0)
+                correct = topic.get('correct', 0)
+                wrong = topic.get('wrong', 0)
+                
+                if total > 0:
+                    accuracy = (correct / total) * 100
+                    topic_info = f"{subject['name']} - {topic['name']}"
+                    
+                    if accuracy < 60 or wrong >= 3:
+                        weak_topics.append(topic_info)
+                    elif accuracy >= 80:
+                        strong_topics.append(topic_info)
+        
+        # Analizi güncelle
+        supabase.table("exam_analysis").update({
+            "weak_topics": json.dumps(weak_topics),
+            "recommendations": ai_analysis
+        }).eq("id", analysis_data["id"]).execute()
+        
+        # Upload status güncelle
+        supabase.table("exam_uploads").update({
+            "analysis_status": "completed"
+        }).eq("id", upload_id).execute()
+        
+        # Öğrenciye bildirim gönder
+        notification_record = {
+            "id": str(uuid.uuid4()),
+            "user_id": upload_data["student_id"],
+            "type": "info",
+            "title": "Deneme Analizi Tamamlandı",
+            "message": f"{upload_data['exam_name']} denemesi için AI analizi tamamlandı.",
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        supabase.table("notifications").insert(notification_record).execute()
+        
+        return {
+            "success": True,
             "weak_topics": weak_topics,
             "strong_topics": strong_topics,
             "ai_analysis": ai_analysis
