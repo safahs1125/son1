@@ -191,13 +191,13 @@ export default function StudentPanel() {
 
         {/* Tabs */}
         <Tabs defaultValue="tasks" className="w-full">
-          <TabsList className="grid w-full grid-cols-8 mb-6">
-            <TabsTrigger value="tasks" data-testid="student-tasks-tab">Görevlerim</TabsTrigger>
-            <TabsTrigger value="exam-analysis" data-testid="student-exam-analysis-tab">Deneme Analizi</TabsTrigger>
-            <TabsTrigger value="analysis" data-testid="student-analysis-tab">Analizim</TabsTrigger>
-            <TabsTrigger value="reports" data-testid="student-reports-tab">Raporlarım</TabsTrigger>
-            <TabsTrigger value="topics" data-testid="student-topics-tab">Konular</TabsTrigger>
-            <TabsTrigger value="exams" data-testid="student-exams-tab">Denemeler</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 mb-6 gap-1">
+            <TabsTrigger value="tasks" data-testid="student-tasks-tab" className="text-xs sm:text-sm">Görevler</TabsTrigger>
+            <TabsTrigger value="exam-analysis" data-testid="student-exam-analysis-tab" className="text-xs sm:text-sm">Deneme</TabsTrigger>
+            <TabsTrigger value="analysis" data-testid="student-analysis-tab" className="text-xs sm:text-sm">Analiz</TabsTrigger>
+            <TabsTrigger value="reports" data-testid="student-reports-tab" className="text-xs sm:text-sm">Rapor</TabsTrigger>
+            <TabsTrigger value="topics" data-testid="student-topics-tab" className="text-xs sm:text-sm">Konular</TabsTrigger>
+            <TabsTrigger value="exams" data-testid="student-exams-tab" className="text-xs sm:text-sm">Deneme</TabsTrigger>
             <TabsTrigger value="notifications" data-testid="student-notifications-tab">Bildirimler</TabsTrigger>
             <TabsTrigger value="calendar" data-testid="student-calendar-tab">Takvim</TabsTrigger>
           </TabsList>
