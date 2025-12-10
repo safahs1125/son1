@@ -126,19 +126,31 @@ export default function CoachNotifications() {
                     {new Date(notification.created_at).toLocaleString('tr-TR')}
                   </p>
                 </div>
-                {!notification.is_read && (
+                <div className="flex items-center gap-2">
+                  {notification.is_read && <CheckCheck className="w-4 h-4 text-gray-400" />}
+                  {!notification.is_read && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        markAsRead(notification.id);
+                      }}
+                      title="Okundu olarak işaretle"
+                    >
+                      <Check className="w-4 h-4 text-green-600" />
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      markAsRead(notification.id);
-                    }}
-                    title="Okundu olarak işaretle"
+                    onClick={(e) => deleteNotification(notification.id, e)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-100"
+                    title="Sil"
                   >
-                    <Check className="w-4 h-4 text-green-600" />
+                    <Trash2 className="w-4 h-4" />
                   </Button>
-                )}
+                </div>
               </div>
             </Card>
           ))}
