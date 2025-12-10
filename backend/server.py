@@ -810,6 +810,12 @@ async def mark_notification_read(notification_id: str):
     response = supabase.table("notifications").update({"is_read": True}).eq("id", notification_id).execute()
     return {"success": True}
 
+@api_router.delete("/notifications/{notification_id}")
+async def delete_notification(notification_id: str):
+    """Bildirimi sil"""
+    response = supabase.table("notifications").delete().eq("id", notification_id).execute()
+    return {"success": True}
+
 @api_router.post("/notifications")
 async def create_notification(data: Notification):
     record = {
