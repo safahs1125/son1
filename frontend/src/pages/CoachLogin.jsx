@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 export default function CoachLogin() {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -19,14 +20,15 @@ export default function CoachLogin() {
     setLoading(true);
     
     try {
-      const response = await axios.post(`${BACKEND_URL}/api/coach/login`, { password });
+      const response = await axios.post(`${BACKEND_URL}/api/coach/login`, { email, password });
       if (response.data.success) {
         localStorage.setItem('coachToken', response.data.token);
+        localStorage.setItem('coachEmail', response.data.email);
         toast.success('Giriş başarılı!');
         navigate('/coach/dashboard');
       }
     } catch (error) {
-      toast.error('Şifre hatalı!');
+      toast.error('Email veya şifre hatalı!');
     } finally {
       setLoading(false);
     }
