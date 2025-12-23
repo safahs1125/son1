@@ -1,11 +1,4 @@
 {
   "buildCommand": "cd frontend && yarn install && yarn build",
-  "outputDirectory": "frontend/build",
-  "installCommand": "pip3 install -r backend/requirements.txt",
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/backend/server.py"
-    }
-  ]
+  "outputDirectory": "frontend/build"
 }
