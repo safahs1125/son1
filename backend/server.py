@@ -189,6 +189,19 @@ async def coach_login(login: CoachLogin):
     print(f"[DEBUG] Password mismatch!")
     raise HTTPException(status_code=401, detail="Email veya şifre hatalı")
 
+# Environment check endpoint (for debugging)
+@api_router.get("/env-check")
+async def env_check():
+    return {
+        "supabase_url_set": bool(os.environ.get('SUPABASE_URL')),
+        "supabase_key_set": bool(os.environ.get('SUPABASE_ANON_KEY')),
+        "coach_email_set": bool(os.environ.get('COACH_EMAIL')),
+        "coach_password_set": bool(os.environ.get('COACH_PASSWORD')),
+        "coach_email_value": os.environ.get('COACH_EMAIL', 'NOT SET')[:20] + "...",
+        "fallback_email": COACH_EMAIL[:20] + "...",
+        "fallback_password_set": bool(COACH_PASSWORD)
+    }
+
 # Coach Change Password
 class ChangePassword(BaseModel):
     current_password: str
