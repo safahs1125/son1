@@ -162,17 +162,31 @@ COACH_PASSWORD = os.environ.get('COACH_PASSWORD', 'coach2025')
 # EMERGENT_LLM_KEY - kullanıcı girmezse None kalır (AI features disabled)
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', None)
 
+# Debug logging for Vercel
+print(f"[DEBUG] COACH_EMAIL configured: {COACH_EMAIL[:10]}...")
+print(f"[DEBUG] COACH_PASSWORD configured: {'Yes' if COACH_PASSWORD else 'No'}")
+
 # Coach Authentication
 @api_router.post("/coach/login", response_model=CoachLoginResponse)
 async def coach_login(login: CoachLogin):
+    # Debug logging
+    print(f"[DEBUG] Login attempt - Email: {login.email}")
+    print(f"[DEBUG] Expected email: {COACH_EMAIL}")
+    print(f"[DEBUG] Email match: {login.email == COACH_EMAIL}")
+    print(f"[DEBUG] Password provided: {'Yes' if login.password else 'No'}")
+    print(f"[DEBUG] Password match: {login.password == COACH_PASSWORD}")
+    
     # Check email
     if login.email != COACH_EMAIL:
+        print(f"[DEBUG] Email mismatch!")
         raise HTTPException(status_code=401, detail="Email veya şifre hatalı")
     
     # Check password - direct comparison (simple and works)
     if login.password == COACH_PASSWORD:
+        print(f"[DEBUG] Login successful!")
         return CoachLoginResponse(success=True, token="coach-token-12345", email=COACH_EMAIL)
     
+    print(f"[DEBUG] Password mismatch!")
     raise HTTPException(status_code=401, detail="Email veya şifre hatalı")
 
 # Coach Change Password
