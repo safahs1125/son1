@@ -1,20 +1,11 @@
 {
-  "version": 2,
   "buildCommand": "cd frontend && yarn install && yarn build",
   "outputDirectory": "frontend/build",
+  "installCommand": "pip3 install -r backend/requirements.txt",
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/index"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/"
+      "source": "/api/(.*)",
+      "destination": "/backend/server.py"
     }
-  ],
-  "functions": {
-    "api/*.py": {
-      "runtime": "python3.9"
-    }
-  }
+  ]
 }
